@@ -1,129 +1,102 @@
 let video;
 let handPose;
 let hands = [];
-let painting;
+let painting; // Camada transparente para o rastro
 
-// Círculos
-let numCircles = 4;
-let circleRadius = 35;
+// Configurações dos Alvos
 let circles = [];
-
-// Tempo
-let interval = 2000; 
+let numCircles = 4;
+let circleRadius = 40;
+let interval = 4000; 
 let lastChange = 0;
 
 function preload() {
-  // CORREÇÃO: Para usar detectStart, a função é ml5.handPose()
   handPose = ml5.handPose({ flipped: true });
 }
 
 function setup() {
   createCanvas(640, 480);
+  
+  // Criamos a camada de rastro (transparente)
   painting = createGraphics(640, 480);
+  painting.clear();
 
-  // Criar o vídeo com flip para parecer um espelho
   video = createCapture(VIDEO, { flipped: true });
   video.size(640, 480);
   video.hide();
-
-  // Iniciar a detecção contínua
+  
   handPose.detectStart(video, gotHands);
-
   generateCircles();
 }
 
 function draw() {
-  background(220);
-  
-  // Desenha o vídeo (já vem invertido pelo flipped: true)
+  // 1. O VÍDEO é desenhado primeiro (100% opacidade para a pessoa se ver bem)
+  tint(255, 255); 
   image(video, 0, 0);
 
-  // Atualiza círculos a cada 2 segundos
+  // 2. LÓGICA DO FADING (Apenas na camada 'painting')
+  // Usamos erase() para fazer o rastro desaparecer suavemente sem escurecer o ecrã
+  painting.push();
+  painting.erase(20, 20); // O número 20 define a velocidade do desaparecimento (calmo)
+  painting.rect(0, 0, width, height);
+  painting.noErase();
+  painting.pop();
+
+  if (hands.length > 0) {
+    let hand = hands[0];
+    let index = hand.index_finger_tip;
+
+    if (index) {
+      // Desenha o rastro do dedo (simples e sem brilhos excessivos)
+      painting.noStroke();
+      painting.fill(200, 0, 200, 150); // Roxo suave com alguma transparência
+      painting.circle(index.x, index.y, 20);
+    }
+  }
+
+  // 3. DESENHA A CAMADA DE PINTURA SOBRE O VÍDEO
+  image(painting, 0, 0);
+
+  // 4. DESENHA OS ALVOS (Sempre nítidos e fáceis de ver)
   if (millis() - lastChange > interval) {
     generateCircles();
   }
-
   drawCircles();
-  drawFinger();
-  
-  // Desenha a camada de pintura acumulada
-  image(painting, 0, 0);
 }
 
-// -------------------------
-// GERA CÍRCULOS COM FOR TRADICIONAL
-// -------------------------
 function generateCircles() {
   circles = [];
+  // Cores sólidas e contrastantes
   let colors = [
-    [0, 255, 0],   // Verde
-    [255, 0, 0],   // Vermelho
-    [0, 150, 255], // Azul
-    [255, 255, 0]  // Amarelo
+    [0, 200, 0],   // Verde
+    [200, 0, 0],   // Vermelho
+    [0, 100, 255], // Azul
+    [255, 200, 0]  // Amarelo
   ];
-
-  // Baralha as cores
   shuffle(colors, true);
 
-  let minDist = 140; 
-
   for (let i = 0; i < numCircles; i++) {
-    let valid = false;
-    let x, y;
-
-    while (!valid) {
-      x = random(80, width - 80);
-      y = random(80, height - 80);
-      valid = true;
-
-      // Loop for tradicional para verificar distância dos círculos anteriores
-      for (let j = 0; j < circles.length; j++) {
-        let c = circles[j];
-        let d = dist(x, y, c.x, c.y);
-        if (d < minDist) {
-          valid = false;
-          break;
-        }
-      }
-    }
-
-    // Atribuição de cor usando o índice i do loop for
-    let corEscolhida = colors[i];
-
-    circles.push({
-      x: x,
-      y: y,
-      r: circleRadius,
-      color: corEscolhida
-    });
+    let x = random(100, width - 100);
+    let y = random(100, height - 100);
+    circles.push({ x: x, y: y, r: circleRadius, color: colors[i] });
   }
-
   lastChange = millis();
 }
 
 function drawCircles() {
   for (let i = 0; i < circles.length; i++) {
     let c = circles[i];
-    fill(c.color[0], c.color[1], c.color[2]);
-    noStroke();
-    circle(c.x, c.y, c.r * 2);
-  }
-}
-
-function drawFinger() {
-  // Verifica se há pelo menos uma mão detetada
-  if (hands.length > 0) {
-    let hand = hands[0];
     
-    // Na v1.2.1, os pontos têm nomes diretos
-    let index = hand.index_finger_tip;
-
-    if (index) {
-      painting.noStroke();
-      painting.fill(255, 0, 255);
-      // O flipped: true no setup já alinha o X do dedo com o vídeo
-      painting.circle(index.x, index.y, 18);
-    }
+    // Desenha o alvo com uma borda grossa para facilitar a visão
+    stroke(255);
+    strokeWeight(4);
+    fill(c.color);
+    circle(c.x, c.y, c.r * 2);
+    
+    // Um pequeno ponto central para ajudar no foco do olhar
+    noStroke();
+    fill(255);
+    circle(c.x, c.y, 8);
   }
 }
 
