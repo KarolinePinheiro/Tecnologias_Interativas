@@ -1,13 +1,15 @@
 let video;
 let handPose;
 let hands = [];
-let painting; // Camada transparente para o rastro
+let painting;
 
-// Configurações dos Alvos
-let circles = [];
+// Círculos
 let numCircles = 4;
-let circleRadius = 40;
-let interval = 4000; 
+let circleRadius = 35;
+let circles = [];
+
+// Tempo
+let targetInterval = 2000; 
 let lastChange = 0;
 
 function preload() {
@@ -17,7 +19,7 @@ function preload() {
 function setup() {
   createCanvas(640, 480);
   
-  // Criamos a camada de rastro (transparente)
+  // Camada apenas para o rastro
   painting = createGraphics(640, 480);
   painting.clear();
 
@@ -26,59 +28,79 @@ function setup() {
   video.hide();
   
   handPose.detectStart(video, gotHands);
+
   generateCircles();
 }
 
 function draw() {
-  // 1. O VÍDEO é desenhado primeiro (100% opacidade para a pessoa se ver bem)
-  tint(255, 255); 
+  // 1. Mostrar vídeo (Fundo)
   image(video, 0, 0);
 
-  // 2. LÓGICA DO FADING (Apenas na camada 'painting')
-  // Usamos erase() para fazer o rastro desaparecer suavemente sem escurecer o ecrã
-  painting.push();
-  painting.erase(20, 20); // O número 20 define a velocidade do desaparecimento (calmo)
+  // 2. Fading do rastro (Apenas na camada painting)
+  painting.erase(20, 20); 
   painting.rect(0, 0, width, height);
   painting.noErase();
-  painting.pop();
 
+  // 3. Atualizar círculos pelo tempo
+  if (millis() - lastChange > targetInterval) {
+    generateCircles();
+  }
+
+  // 4. Desenhar círculos
+  drawCircles();
+
+  // 5. Desenhar dedo no layer de pintura
   if (hands.length > 0) {
     let hand = hands[0];
     let index = hand.index_finger_tip;
 
     if (index) {
-      // Desenha o rastro do dedo (simples e sem brilhos excessivos)
       painting.noStroke();
-      painting.fill(200, 0, 200, 150); // Roxo suave com alguma transparência
-      painting.circle(index.x, index.y, 20);
+      painting.fill(255, 0, 255);
+      painting.circle(index.x, index.y, 18);
     }
   }
 
-  // 3. DESENHA A CAMADA DE PINTURA SOBRE O VÍDEO
+  // 6. Mostrar layer do rastro
   image(painting, 0, 0);
-
-  // 4. DESENHA OS ALVOS (Sempre nítidos e fáceis de ver)
-  if (millis() - lastChange > interval) {
-    generateCircles();
-  }
-  drawCircles();
 }
 
 function generateCircles() {
   circles = [];
-  // Cores sólidas e contrastantes
   let colors = [
-    [0, 200, 0],   // Verde
-    [200, 0, 0],   // Vermelho
-    [0, 100, 255], // Azul
-    [255, 200, 0]  // Amarelo
+    [0, 255, 0],   // Verde
+    [255, 0, 0],   // Vermelho
+    [0, 150, 255], // Azul
+    [255, 255, 0]  // Amarelo
   ];
   shuffle(colors, true);
 
+  let minDist = 140; 
+
   for (let i = 0; i < numCircles; i++) {
-    let x = random(100, width - 100);
-    let y = random(100, height - 100);
-    circles.push({ x: x, y: y, r: circleRadius, color: colors[i] });
+    let valid = false;
+    let x, y;
+
+    while (!valid) {
+      x = random(80, width - 80);
+      y = random(80, height - 80);
+      valid = true;
+      for (let j = 0; j < circles.length; j++) {
+        let c = circles[j];
+        let d = dist(x, y, c.x, c.y);
+        if (d < minDist) {
+          valid = false;
+          break;
+        }
+      }
+    }
+    
+    circles.push({
+      x: x,
+      y: y,
+      r: circleRadius,
+      color: colors[i]
+    });
   }
   lastChange = millis();
 }
@@ -86,17 +108,9 @@ function generateCircles() {
 function drawCircles() {
   for (let i = 0; i < circles.length; i++) {
     let c = circles[i];
-    
-    // Desenha o alvo com uma borda grossa para facilitar a visão
-    stroke(255);
-    strokeWeight(4);
-    fill(c.color);
-    circle(c.x, c.y, c.r * 2);
-    
-    // Um pequeno ponto central para ajudar no foco do olhar
+    fill(c.color[0], c.color[1], c.color[2]);
     noStroke();
-    fill(255);
-    circle(c.x, c.y, 8);
+    circle(c.x, c.y, c.r * 2);
   }
 }
 
