@@ -7,6 +7,7 @@ let painting;
 let numCircles = 4;
 let circleRadius = 35;
 let circles = [];
+let score = 0; // Adicionado para a lógica de colisão
 
 // Tempo
 let targetInterval = 2000; 
@@ -49,20 +50,41 @@ function draw() {
   // 4. Desenhar círculos
   drawCircles();
 
-  // 5. Desenhar dedo no layer de pintura
+  // 5. Desenhar dedo no layer de pintura e VERIFICAR COLISÃO
   if (hands.length > 0) {
     let hand = hands[0];
     let index = hand.index_finger_tip;
 
     if (index) {
+      // Desenho do rastro
       painting.noStroke();
       painting.fill(255, 0, 255);
       painting.circle(index.x, index.y, 18);
+
+      // --- Lógica de Colisão Inserida ---
+      for (let i = circles.length - 1; i >= 0; i--) {
+        let c = circles[i];
+        let d = dist(index.x, index.y, c.x, c.y);
+
+        if (d < c.r) {
+          circles.splice(i, 1); // Remove o círculo atingido
+          score += 10;          // Aumenta a pontuação
+          
+          // Opcional: gera novos círculos se todos forem atingidos
+          if (circles.length === 0) generateCircles();
+        }
+      }
+      // ----------------------------------
     }
   }
 
   // 6. Mostrar layer do rastro
   image(painting, 0, 0);
+  
+  // Extra: Mostrar score no ecrã
+  fill(255);
+  textSize(20);
+  text("Score: " + score, 20, 30);
 }
 
 function generateCircles() {
@@ -99,7 +121,7 @@ function generateCircles() {
       x: x,
       y: y,
       r: circleRadius,
-      color: colors[i]
+      color: colors[i % colors.length]
     });
   }
   lastChange = millis();
