@@ -1,36 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test</title>
-    <link rel="stylesheet" href="estilos.css">
+    <link rel="stylesheet" href="styles.css">
     <script src="gamification.js"></script>
 </head>
 <body>
     <div id="game-container">
-  <div id="menu">
-    <h1>TREINO DE REAÇÃO</h1>
-    <p>Escolhe a dificuldade:</p>
-    
-    <div class="button-group">
-      <button onclick="startGame('easy')">FÁCIL</button>
-      <button onclick="startGame('medium')">MÉDIO</button>
-      <button onclick="startGame('hard')">DIFÍCIL</button>
-      <button id="btn-inst" onclick="showInstructions()">INSTRUÇÕES</button>
-    </div>
-    <p id="error-msg" style="color: #ff5050; display: none;">Ficheiro não encontrado</p>
-  </div>
+        <div id="menu">
+            <h1>TREINO DE REAÇÃO</h1>
+            <p>Escolhe a dificuldade:</p>
+            <div class="button-group">
+                <button onclick="startGame('easy')">FÁCIL</button>
+                <button onclick="startGame('medium')">MÉDIO</button>
+                <button onclick="startGame('hard')">DIFÍCIL</button>
+                <button id="btn-inst" onclick="showInstructions()">INSTRUÇÕES</button>
+            </div>
+            <p id="error-msg" style="color: #ff5050; display: none; margin-top: 10px;">Ficheiro não encontrado</p>
+        </div>
 
-  <div id="hud" style="display: none;">
-    <div id="stats">
-      <p>Pontos: <span id="score">0</span></p>
-      <p>Tempo: <span id="timer">30</span>s</p>
-    </div>
-    <h2 id="instruction-text">TOCA NO VERMELHO</h2>
-  </div>
+        <div id="hud" style="display: none;">
+            <div id="stats">
+                <div class="stat-box">
+                    <p>Nível: <span id="level-name">-</span></p>
+                    <p>Tempo: <span id="timer">0</span>s</p>
+                </div>
+                <div class="stat-box" style="text-align: right;">
+                    <p>Pontos: <span id="score">0</span></p>
+                    <p>Certos: <span id="correct">0</span> | Errados: <span id="wrong">0</span></p>
+                </div>
+            </div>
+            <h2 id="instruction-text">TOCA NA COR INDICADA</h2>
+        </div>
 
-  <canvas id="gameCanvas" width="600" height="500"></canvas>
-</div>
-</body>
+        <canvas id="gameCanvas" width="600" height="500"></canvas>
+    </div> </body>
 </html>
