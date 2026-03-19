@@ -1,133 +1,117 @@
-/* Reset básico para evitar margens indesejadas */
-body, html {
+/* Configuração da Página */
+body {
     margin: 0;
     padding: 0;
-    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #f0f2f5; /* Um cinza muito leve para destacar o container */
+    height: 100vh;
+    background-color: #f4f4f4;
+    font-family: 'Segoe UI', Arial, sans-serif;
 }
 
-/* O Contentor Principal - Onde tudo acontece */
+/* Contentor do Jogo */
 #game-container {
     position: relative;
     width: 600px;
-    height: 600px; /* Aumentado ligeiramente para caber tudo à vontade */
-    background-color: #ffffff;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1); /* Sombra suave para parecer moderno */
+    height: 500px;
+    background-color: #fff;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    border-radius: 15px;
     overflow: hidden;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    display: flex;
-    flex-direction: column;
 }
 
-/* Centralização Absoluta do Menu */
+/* Menu Centralizado */
 #menu {
     position: absolute;
     inset: 0;
+    background: #ffffff;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center; /* Centra verticalmente */
-    text-align: center;
-    padding: 20px;
+    justify-content: center;
     z-index: 100;
 }
 
 #menu h1 {
     font-size: 42px;
-    margin: 0 0 10px 0;
-    color: #1a1a1a;
-    letter-spacing: -1px;
-}
-
-#menu p {
-    font-size: 18px;
-    color: #666;
-    margin-bottom: 30px;
-}
-
-/* Grupo de Botões Centrado */
-.button-group {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    width: 100%;
-    align-items: center;
-}
-
-/* Estilo dos Botões (Brancos com contorno ou sombra) */
-button {
-    width: 280px;
-    padding: 15px 0;
-    font-size: 18px;
-    font-weight: 600;
-    cursor: pointer;
-    border: 1px solid #ddd;
-    border-radius: 12px;
-    background-color: #ffffff;
-    color: #333;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-}
-
-/* Efeito Hover - Dá vida aos botões */
-button:hover {
-    background-color: #f8f9fa;
-    border-color: #bbb;
-    transform: translateY(-2px); /* Pequeno salto ao passar o rato */
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-
-/* Botão de Instruções/Exit com destaque suave */
-#btn-inst, button:last-child {
-    background-color: #f1f1f1;
-}
-
-/* HUD - Interface durante o jogo (Escondida no início) */
-#hud {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    padding: 25px;
-    box-sizing: border-box;
-    z-index: 50;
-}
-
-#stats {
-    display: flex;
-    justify-content: space-between;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 15px;
-    border-radius: 12px;
-    border: 1px solid #eee;
-}
-
-.stat-box p {
-    margin: 2px 0;
-    font-size: 16px;
-    color: #444;
-}
-
-#level-name, #timer, #score, #correct, #wrong {
-    font-weight: bold;
-    color: #000;
-}
-
-/* Título da Instrução de Cor */
-#instruction-text {
-    text-align: center;
-    margin-top: 20px;
-    font-size: 24px;
+    margin-bottom: 5px;
     color: #222;
 }
 
-/* Erro de ficheiro */
-#error-msg {
-    margin-top: 15px;
-    font-size: 14px;
+.button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+/* Botões Estilo "Pílula" */
+button {
+    width: 260px;
+    padding: 12px;
+    font-size: 18px;
     font-weight: bold;
+    cursor: pointer;
+    border: 2px solid #333;
+    border-radius: 12px;
+    background-color: #fff;
+    color: #333;
+    transition: all 0.2s;
+}
+
+button:hover {
+    background-color: #333;
+    color: #fff;
+}
+
+#btn-exit {
+    background-color: #ffeded;
+    border-color: #ff4444;
+    color: #ff4444;
+}
+
+#btn-exit:hover {
+    background-color: #ff4444;
+    color: #fff;
+}
+
+/* HUD e Controlos de Jogo */
+#hud {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    padding: 15px;
+    box-sizing: border-box;
+    z-index: 50;
+    pointer-events: none; /* Deixa cliques passarem para o jogo */
+}
+
+#top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: auto; /* Reativa cliques para os botões de pausa */
+}
+
+.small-btn {
+    width: auto !important;
+    padding: 5px 15px !important;
+    font-size: 14px !important;
+    margin-right: 5px;
+}
+
+#stats-display {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+#instruction-text {
+    text-align: center;
+    margin-top: 20px;
+    color: #333;
+    text-transform: uppercase;
 }
