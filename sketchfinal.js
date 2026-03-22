@@ -2,13 +2,16 @@ let video, handPose, hands = [];
 let circles = [], correct = 0, wrong = 0, timeLeft = 0;
 let gameActive = false, isPaused = false, gameTimer = null, lastChange = 0, targetColor = null;
 
+// --- SONS DO JOGO ---
+let soundCorrect, soundError;
+
 // --- NOVAS VARIÁVEIS PARA SUAVIZAÇÃO (LERP) ---
 let smoothedX = 0;
 let smoothedY = 0;
 let lerpFactor = 0.25; // Entre 0 e 1. Quanto menor, mais suave/lento é o movimento.
 
 // Configurações do Jogo
-let cfg = { size: 60, hitDist: 35, interval: 3000, hold: false, black: false };
+let valinit = { size: 60, hitDist: 35, interval: 3000, hold: false, black: false };
 
 const palette = [
     { name: 'VERDE', rgb: [0, 200, 0] },
@@ -18,7 +21,9 @@ const palette = [
 ];
 
 function preload() { 
-    handPose = ml5.handPose({ flipped: true }); 
+    handPose = ml5.handPose({ flipped: true });
+    soundCorrect = createAudio('acerto.mp3');
+    soundError = createAudio('erro.mp3');
 }
 
 function setup() {
@@ -46,7 +51,7 @@ function draw() {
 
     if (!gameActive || isPaused) return;
 
-    if (millis() - lastChange > cfg.interval) generateCircles();
+    if (millis() - lastChange > valinit.interval) generateCircles();
 
     // Desenhar Círculos (Alvos)
     circles.forEach(c => {
@@ -54,7 +59,7 @@ function draw() {
         noStroke();
         circle(c.x, c.y, c.size);
         
-        if (cfg.hold && c.name === targetColor.name) {
+        if (valinit.hold && c.name === targetColor.name) {
             noFill(); 
             stroke(255); 
             strokeWeight(4);
@@ -87,27 +92,31 @@ function checkCollisions(pos) {
         let c = circles[i];
         let d = dist(pos.x, pos.y, c.x, c.y);
 
-        // Ajuste: A colisão considera o raio do círculo + a distância de tolerância (cfg.hitDist)
-        if (d < (c.size / 2 + cfg.hitDist)) {
+        // Ajuste: A colisão considera o raio do círculo + a distância de tolerância (valinit.hitDist)
+        if (d < (c.size / 2 + valinit.hitDist)) {
             if (c.isBlack) {
-                wrong++; 
+                wrong++;
+                soundError.play();
                 circles.splice(i, 1);
             } else if (c.name === targetColor.name) {
-                if (cfg.hold) {
+                if (valinit.hold) {
                     c.hold += 4; // Velocidade do preenchimento ao segurar
                     if (c.hold >= 100) { 
-                        correct++; 
+                        correct++;
+                        soundCorrect.play();
                         circles.splice(i, 1); 
                         pickNewTarget(); 
                     }
                 } else {
-                    correct++; 
+                    correct++;
+                    soundCorrect.play();
                     circles.splice(i, 1); 
                     pickNewTarget();
                 }
             } else {
                 // Tocou na cor errada
-                wrong++; 
+                wrong++;
+                soundError.play();
                 circles.splice(i, 1);
             }
             updateHUD();
@@ -128,17 +137,17 @@ window.startGame = function(level) {
     // Ajuste de dificuldade focado em reabilitação (hitDist mais generoso)
     switch(level) {
         case 'easy':
-            cfg = { size: 85, hitDist: 35, interval: 6000, hold: false, black: false, time: 30 };
+            valinit = { size: 85, hitDist: 35, interval: 6000, hold: false, black: false, time: 30 };
             break;
         case 'medium':
-            cfg = { size: 65, hitDist: 20, interval: 4000, hold: true, black: false, time: 30 };
+            valinit = { size: 65, hitDist: 20, interval: 4000, hold: true, black: false, time: 30 };
             break;
         case 'hard':
-            cfg = { size: 45, hitDist: 10, interval: 2500, hold: false, black: true, time: 30 };
+            valinit = { size: 45, hitDist: 10, interval: 2500, hold: false, black: true, time: 30 };
             break;
     }
     
-    timeLeft = cfg.time;
+    timeLeft = valinit.time;
     generateCircles();
     updateHUD();
     startTimer();
@@ -152,15 +161,15 @@ function generateCircles() {
             x: pos.x, y: pos.y, 
             rgb: palette[i].rgb, 
             name: palette[i].name, 
-            size: cfg.size, 
+            size: valinit.size, 
             hold: 0, 
             isBlack: false 
         });
     }
     
-    if (cfg.black) {
+    if (valinit.black) {
         let pos = getSafePos();
-        circles.push({ x: pos.x, y: pos.y, rgb: [0,0,0], name: 'PRETO', size: cfg.size, isBlack: true });
+        circles.push({ x: pos.x, y: pos.y, rgb: [0,0,0], name: 'PRETO', size: valinit.size, isBlack: true });
     }
     
     pickNewTarget();
@@ -231,3 +240,22 @@ function endGame() {
     document.getElementById('final-correct').innerText = correct;
     document.getElementById('final-wrong').innerText = wrong;
 }
+
+// --- FUNÇÕES DE INSTRUÇÕES ---
+window.showInstructions = function() {
+    fetch('instructions.txt')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('instructions-text').innerText = data;
+            document.getElementById('instructions-screen').style.display = 'flex';
+        })
+        .catch(error => {
+            console.error('Erro ao carregar instruções:', error);
+            document.getElementById('instructions-text').innerText = 'Erro ao carregar as instruções.';
+            document.getElementById('instructions-screen').style.display = 'flex';
+        });
+};
+
+window.closeInstructions = function() {
+    window.close();
+};

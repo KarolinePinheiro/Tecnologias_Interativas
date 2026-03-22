@@ -20,6 +20,7 @@
                 <button onclick="startGame('easy')">FÁCIL</button>
                 <button onclick="startGame('medium')">MÉDIO</button>
                 <button onclick="startGame('hard')">DIFÍCIL</button>
+                <button onclick="showInstructions()">INSTRUÇÕES</button>
                 <button id="btn-exit" onclick="location.reload()">SAIR</button>
             </div>
         </div>
@@ -28,9 +29,11 @@
             <div id="top-bar">
                 <div class="controls">
                     <button class="mini-btn" onclick="backToMenu()">VOLTAR</button>
-                    <button id="pause-btn" class="mini-btn" onclick="togglePause()">PAUSA</button>
                 </div>
                 <div id="target-display">TOCA NO: <span id="target-name">-</span></div>
+                <div class="pause-controls">
+                    <button id="pause-btn" class="mini-btn" onclick="togglePause()">PAUSA</button>
+                </div>
             </div>
             <div id="stats-bar">
                 <span>Tempo: <b id="timer">0</b>s</span>
@@ -44,6 +47,14 @@
             <p>Acertos: <span id="final-correct">0</span></p>
             <p>Errados: <span id="final-wrong">0</span></p>
             <button onclick="backToMenu()">VOLTAR AO MENU</button>
+        </div>
+
+        <div id="instructions-screen" class="overlay" style="display: none;">
+            <div class="instructions-content">
+                <h2>INSTRUÇÕES</h2>
+                <div id="instructions-text"></div>
+                <button onclick="closeInstructions()">FECHAR</button>
+            </div>
         </div>
     </div>
     <script src="sketchfinal.js"></script>
