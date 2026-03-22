@@ -1,117 +1,150 @@
-/* Configuração da Página */
-body {
+/* Reset e Base */
+* {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
+}
+
+body {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #f4f4f4;
-    font-family: 'Segoe UI', Arial, sans-serif;
-}
-
-/* Contentor do Jogo */
-#game-container {
-    position: relative;
-    width: 600px;
-    height: 500px;
-    background-color: #fff;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    border-radius: 15px;
+    background-color: #0f0f0f; /* Fundo escuro para destacar o canvas */
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     overflow: hidden;
 }
 
-/* Menu Centralizado */
+/* Contentor Principal (Tamanho fixo do Canvas 640x480) */
+#game-container {
+    position: relative;
+    width: 640px;
+    height: 480px;
+    background-color: #000;
+    border-radius: 12px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    border: 4px solid #333;
+    overflow: hidden;
+}
+
+/* Menu Inicial e de Pausa */
 #menu {
     position: absolute;
     inset: 0;
-    background: #ffffff;
+    background: rgba(255, 255, 255, 0.95);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    z-index: 100;
+    z-index: 100; /* Garante que fica à frente de tudo */
+    text-align: center;
 }
 
 #menu h1 {
-    font-size: 42px;
-    margin-bottom: 5px;
-    color: #222;
+    font-size: 32px;
+    color: #1a1a1a;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
 }
 
+/* Grupo de Botões */
 .button-group {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    margin-top: 20px;
 }
 
-/* Botões Estilo "Pílula" */
 button {
-    width: 260px;
-    padding: 12px;
-    font-size: 18px;
+    width: 280px;
+    padding: 14px;
+    font-size: 16px;
     font-weight: bold;
+    text-transform: uppercase;
     cursor: pointer;
-    border: 2px solid #333;
-    border-radius: 12px;
-    background-color: #fff;
-    color: #333;
-    transition: all 0.2s;
+    border: 2px solid #222;
+    border-radius: 50px; /* Estilo pílula */
+    background: white;
+    transition: all 0.3s ease;
 }
 
 button:hover {
-    background-color: #333;
-    color: #fff;
+    background: #222;
+    color: white;
+    transform: translateY(-2px);
 }
 
 #btn-exit {
-    background-color: #ffeded;
+    background-color: #fff0f0;
     border-color: #ff4444;
     color: #ff4444;
+    margin-top: 10px;
 }
 
 #btn-exit:hover {
     background-color: #ff4444;
-    color: #fff;
+    color: white;
 }
 
-/* HUD e Controlos de Jogo */
+/* HUD (Interface durante o jogo) */
 #hud {
     position: absolute;
     top: 0;
+    left: 0;
     width: 100%;
-    padding: 15px;
-    box-sizing: border-box;
+    height: 100%;
+    padding: 20px;
+    pointer-events: none; /* Permite clicar "através" da div no jogo */
     z-index: 50;
-    pointer-events: none; /* Deixa cliques passarem para o jogo */
 }
 
 #top-bar {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    pointer-events: auto; /* Reativa cliques para os botões de pausa */
+    align-items: flex-start;
+    pointer-events: auto; /* Reativa cliques para os botões do HUD */
+}
+
+.level-info {
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    border: 1px solid rgba(255,255,255,0.3);
 }
 
 .small-btn {
-    width: auto !important;
-    padding: 5px 15px !important;
-    font-size: 14px !important;
-    margin-right: 5px;
+    width: auto;
+    padding: 8px 15px;
+    font-size: 12px;
+    border-radius: 8px;
 }
 
+/* Estatísticas (Score e Tempo) */
 #stats-display {
     display: flex;
     justify-content: space-between;
-    margin-top: 15px;
+    margin-top: 10px;
+    color: white;
+    font-size: 20px;
     font-weight: bold;
-    font-size: 18px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
 }
 
 #instruction-text {
+    position: absolute;
+    bottom: 30px;
+    width: 100%;
+    left: 0;
     text-align: center;
-    margin-top: 20px;
-    color: #333;
+    font-size: 24px;
     text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+}
+
+/* Ajuste do Canvas gerado pelo p5.js */
+canvas {
+    display: block;
+    border-radius: 8px;
 }

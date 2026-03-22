@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treino Cognitivo - Precisão</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.11/lib/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/addons/p5.sound.min.js"></script>
+    <script src="https://unpkg.com/ml5@1.2.1/dist/ml5.min.js"></script>
+</head>
+<body>
+    <div id="game-container">
+        <div id="menu">
+            <h1>TREINO DE PRECISÃO</h1>
+            <div class="button-group">
+                <button onclick="startGame('easy')">FÁCIL (Toque)</button>
+                <button onclick="startGame('medium')">MÉDIO (Segurar Centro)</button>
+                <button onclick="startGame('hard')">DIFÍCIL (Precisão + Obstáculos)</button>
+                <button id="btn-exit" onclick="exitApp()">SAIR</button>
+            </div>
+        </div>
+
+        <div id="hud" style="display: none;">
+            <div id="top-bar">
+                <button class="small-btn" onclick="backToMenu()">VOLTAR</button>
+                <div class="level-info">Nível: <span id="level-name">-</span></div>
+            </div>
+            <div id="stats-display">
+                <p>Tempo: <span id="timer">0</span>s</p>
+                <p>Pontos: <span id="score-val">0</span></p>
+            </div>
+            <h3 id="instruction-text" style="text-align:center; color: yellow;"></h3>
+        </div>
+    </div>
+    <script src="sketchfinal.js"></script>
+</body>
+</html>
