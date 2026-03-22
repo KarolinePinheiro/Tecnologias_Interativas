@@ -2,7 +2,12 @@ let video, handPose, hands = [];
 let circles = [], correct = 0, wrong = 0, timeLeft = 0;
 let gameActive = false, isPaused = false, gameTimer = null, lastChange = 0, targetColor = null;
 
-// Configurações do Switch
+// --- NOVAS VARIÁVEIS PARA SUAVIZAÇÃO (LERP) ---
+let smoothedX = 0;
+let smoothedY = 0;
+let lerpFactor = 0.25; // Entre 0 e 1. Quanto menor, mais suave/lento é o movimento.
+
+// Configurações do Jogo
 let cfg = { size: 60, hitDist: 35, interval: 3000, hold: false, black: false };
 
 const palette = [
@@ -12,17 +17,27 @@ const palette = [
     { name: 'AMARELO', rgb: [255, 220, 0] }
 ];
 
-function preload() { handPose = ml5.handPose({ flipped: true }); }
+function preload() { 
+    handPose = ml5.handPose({ flipped: true }); 
+}
 
 function setup() {
     let canvas = createCanvas(640, 480);
     canvas.parent('game-container');
+    
     video = createCapture(VIDEO, { flipped: true }, () => {
         document.getElementById('loading-screen').style.display = 'none';
         document.getElementById('menu').style.display = 'flex';
     });
-    video.size(640, 480); video.hide();
+    
+    video.size(640, 480); 
+    video.hide();
+    
     handPose.detectStart(video, (res) => hands = res);
+
+    // Inicializar posição suavizada no centro
+    smoothedX = width / 2;
+    smoothedY = height / 2;
 }
 
 function draw() {
@@ -33,42 +48,67 @@ function draw() {
 
     if (millis() - lastChange > cfg.interval) generateCircles();
 
-    // Desenhar Círculos
+    // Desenhar Círculos (Alvos)
     circles.forEach(c => {
         fill(c.rgb);
         noStroke();
         circle(c.x, c.y, c.size);
+        
         if (cfg.hold && c.name === targetColor.name) {
-            noFill(); stroke(255); strokeWeight(3);
-            arc(c.x, c.y, c.size+10, c.size+10, 0, map(c.hold, 0, 100, 0, TWO_PI));
+            noFill(); 
+            stroke(255); 
+            strokeWeight(4);
+            // Desenha o progresso do "Hold" em volta do círculo
+            arc(c.x, c.y, c.size + 15, c.size + 15, 0, map(c.hold, 0, 100, 0, TWO_PI));
         }
     });
 
-    // Rastro do Dedo (Fixo e Estável)
+    // Lógica do Cursor com Filtro de Suavização (Lerp)
     if (hands.length > 0) {
-        let f = hands[0].index_finger_tip;
-        fill(255, 0, 255); circle(f.x, f.y, 15);
-        checkCollisions(f);
+        let finger = hands[0].index_finger_tip;
+
+        // A posição suavizada "persegue" a posição real detetada pela IA
+        smoothedX = lerp(smoothedX, finger.x, lerpFactor);
+        smoothedY = lerp(smoothedY, finger.y, lerpFactor);
+
+        // Desenhar Cursor Visual (Rosa com borda branca para melhor visibilidade)
+        stroke(255);
+        strokeWeight(2);
+        fill(255, 0, 255); 
+        circle(smoothedX, smoothedY, 20);
+        
+        // Verificar colisões usando a posição suavizada
+        checkCollisions({ x: smoothedX, y: smoothedY });
     }
 }
 
-function checkCollisions(f) {
+function checkCollisions(pos) {
     for (let i = circles.length - 1; i >= 0; i--) {
         let c = circles[i];
-        let d = dist(f.x, f.y, c.x, c.y);
+        let d = dist(pos.x, pos.y, c.x, c.y);
 
-        if (d < (c.size/2 + cfg.hitDist)) {
+        // Ajuste: A colisão considera o raio do círculo + a distância de tolerância (cfg.hitDist)
+        if (d < (c.size / 2 + cfg.hitDist)) {
             if (c.isBlack) {
-                wrong++; circles.splice(i, 1);
+                wrong++; 
+                circles.splice(i, 1);
             } else if (c.name === targetColor.name) {
                 if (cfg.hold) {
-                    c.hold += 5;
-                    if (c.hold >= 100) { correct++; circles.splice(i, 1); pickNewTarget(); }
+                    c.hold += 4; // Velocidade do preenchimento ao segurar
+                    if (c.hold >= 100) { 
+                        correct++; 
+                        circles.splice(i, 1); 
+                        pickNewTarget(); 
+                    }
                 } else {
-                    correct++; circles.splice(i, 1); pickNewTarget();
+                    correct++; 
+                    circles.splice(i, 1); 
+                    pickNewTarget();
                 }
             } else {
-                wrong++; circles.splice(i, 1);
+                // Tocou na cor errada
+                wrong++; 
+                circles.splice(i, 1);
             }
             updateHUD();
         }
@@ -76,24 +116,28 @@ function checkCollisions(f) {
 }
 
 window.startGame = function(level) {
-    correct = 0; wrong = 0; gameActive = true; isPaused = false;
+    correct = 0; 
+    wrong = 0; 
+    gameActive = true; 
+    isPaused = false;
+    
     document.getElementById('menu').style.display = 'none';
     document.getElementById('hud').style.display = 'block';
     document.getElementById('results-screen').style.display = 'none';
 
+    // Ajuste de dificuldade focado em reabilitação (hitDist mais generoso)
     switch(level) {
         case 'easy':
-            cfg = { size: 70, hitDist: 20, interval: 4000, hold: false, black: false, time: 30 };
+            cfg = { size: 85, hitDist: 35, interval: 6000, hold: false, black: false, time: 30 };
             break;
         case 'medium':
-            // Circulos menores (55), mais rápido (2.2s), precisa segurar
-            cfg = { size: 55, hitDist: 10, interval: 2200, hold: true, black: false, time: 30 };
+            cfg = { size: 65, hitDist: 20, interval: 4000, hold: true, black: false, time: 30 };
             break;
         case 'hard':
-            // Circulos pequenos (40), muito rápido (1.5s), precisão centro, bolas pretas
-            cfg = { size: 40, hitDist: 5, interval: 1500, hold: false, black: true, time: 25 };
+            cfg = { size: 45, hitDist: 10, interval: 2500, hold: false, black: true, time: 30 };
             break;
     }
+    
     timeLeft = cfg.time;
     generateCircles();
     updateHUD();
@@ -102,31 +146,41 @@ window.startGame = function(level) {
 
 function generateCircles() {
     circles = [];
-    let margin = 80;
     for (let i = 0; i < 4; i++) {
         let pos = getSafePos();
-        circles.push({ x: pos.x, y: pos.y, rgb: palette[i].rgb, name: palette[i].name, size: cfg.size, hold: 0, isBlack: false });
+        circles.push({ 
+            x: pos.x, y: pos.y, 
+            rgb: palette[i].rgb, 
+            name: palette[i].name, 
+            size: cfg.size, 
+            hold: 0, 
+            isBlack: false 
+        });
     }
+    
     if (cfg.black) {
         let pos = getSafePos();
         circles.push({ x: pos.x, y: pos.y, rgb: [0,0,0], name: 'PRETO', size: cfg.size, isBlack: true });
     }
+    
     pickNewTarget();
     lastChange = millis();
 }
 
 function getSafePos() {
     let x, y, tooClose;
-    let margin = 60;
+    let margin = 70;
+    let attempts = 0;
     do {
         tooClose = false;
         x = random(margin, width - margin);
         y = random(margin + 60, height - margin);
         for (let c of circles) {
-            if (dist(x, y, c.x, c.y) < 110) tooClose = true;
+            if (dist(x, y, c.x, c.y) < 120) tooClose = true;
         }
-    } while (tooClose);
-    return {x, y};
+        attempts++;
+    } while (tooClose && attempts < 50);
+    return { x, y };
 }
 
 function pickNewTarget() {
@@ -156,7 +210,8 @@ window.togglePause = function() {
 };
 
 window.backToMenu = function() {
-    gameActive = false; isPaused = false;
+    gameActive = false; 
+    isPaused = false;
     clearInterval(gameTimer);
     document.getElementById('hud').style.display = 'none';
     document.getElementById('results-screen').style.display = 'none';
@@ -169,7 +224,8 @@ function updateHUD() {
 }
 
 function endGame() {
-    gameActive = false; clearInterval(gameTimer);
+    gameActive = false; 
+    clearInterval(gameTimer);
     document.getElementById('hud').style.display = 'none';
     document.getElementById('results-screen').style.display = 'flex';
     document.getElementById('final-correct').innerText = correct;
