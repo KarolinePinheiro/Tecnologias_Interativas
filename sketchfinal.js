@@ -56,7 +56,8 @@ function draw() {
     // Desenhar Círculos (Alvos)
     circles.forEach(c => {
         fill(c.rgb);
-        noStroke();
+        stroke(255); // borda branca para boa leitura em qualquer fundo
+        strokeWeight(3);
         circle(c.x, c.y, c.size);
         
         if (valinit.hold && c.name === targetColor.name) {
@@ -134,16 +135,16 @@ window.startGame = function(level) {
     document.getElementById('hud').style.display = 'block';
     document.getElementById('results-screen').style.display = 'none';
 
-    // Ajuste de dificuldade focado em reabilitação (hitDist mais generoso)
+    // Ajuste de dificuldade focado em reabilitação (hitDist mais generoso) e tempo de reação
     switch(level) {
         case 'easy':
-            valinit = { size: 85, hitDist: 35, interval: 6000, hold: false, black: false, time: 30 };
+            valinit = { size: 85, hitDist: 35, interval: 1200, hold: false, black: false, time: 40 };
             break;
         case 'medium':
-            valinit = { size: 65, hitDist: 20, interval: 4000, hold: true, black: false, time: 30 };
+            valinit = { size: 65, hitDist: 20, interval: 900, hold: true, black: false, time: 30 };
             break;
         case 'hard':
-            valinit = { size: 45, hitDist: 10, interval: 2500, hold: false, black: true, time: 30 };
+            valinit = { size: 45, hitDist: 10, interval: 600, hold: false, black: true, time: 20 };
             break;
     }
     
