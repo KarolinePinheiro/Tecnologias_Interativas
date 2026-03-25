@@ -169,13 +169,13 @@ window.startGame = function(level) {
 
     switch(level) {
         case 'easy':
-            valinit = { size: 90, hitDist: 45, interval: 1400, hold: false, black: false, time: 40 };
+            valinit = { size: 90, hitDist: 45, interval: 6000, hold: false, black: false, time: 40 };
             break;
         case 'medium':
-            valinit = { size: 70, hitDist: 30, interval: 1000, hold: true, black: false, time: 35 };
+            valinit = { size: 70, hitDist: 30, interval: 4000, hold: true, black: false, time: 35 };
             break;
         case 'hard':
-            valinit = { size: 50, hitDist: 15, interval: 700, hold: false, black: true, time: 30 };
+            valinit = { size: 50, hitDist: 15, interval: 72500, hold: false, black: true, time: 30 };
             break;
     }
     
