@@ -175,7 +175,7 @@ window.startGame = function(level) {
             valinit = { size: 70, hitDist: 30, interval: 4000, hold: true, black: false, time: 35 };
             break;
         case 'hard':
-            valinit = { size: 50, hitDist: 15, interval: 72500, hold: false, black: true, time: 30 };
+            valinit = { size: 50, hitDist: 15, interval: 2500, hold: false, black: true, time: 30 };
             break;
     }
     
