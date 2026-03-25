@@ -214,19 +214,20 @@ function startTimer() {
     }, 1000);
 }
 
-window.togglePause = function() {
+function togglePause() {
     isPaused = !isPaused;
     document.getElementById('pause-btn').innerText = isPaused ? "CONTINUAR" : "PAUSA";
-};
+}
 
-window.backToMenu = function() {
-    gameActive = false; 
+function backToMenu() {
+    gameActive = false;
     isPaused = false;
     clearInterval(gameTimer);
     document.getElementById('hud').style.display = 'none';
     document.getElementById('results-screen').style.display = 'none';
+    document.getElementById('instructions-screen').style.display = 'none';
     document.getElementById('menu').style.display = 'flex';
-};
+}
 
 function updateHUD() {
     document.getElementById('correct-count').innerText = correct;
@@ -243,7 +244,7 @@ function endGame() {
 }
 
 // --- FUNÇÕES DE INSTRUÇÕES ---
-window.showInstructions = function() {
+function showInstructions() {
     fetch('instructions.txt')
         .then(response => response.text())
         .then(data => {
@@ -255,8 +256,9 @@ window.showInstructions = function() {
             document.getElementById('instructions-text').innerText = 'Erro ao carregar as instruções.';
             document.getElementById('instructions-screen').style.display = 'flex';
         });
-};
+}
 
-window.closeInstructions = function() {
-    window.close();
-};
+function closeInstructions() {
+    document.getElementById('instructions-screen').style.display = 'none';
+    document.getElementById('menu').style.display = 'flex';
+}
